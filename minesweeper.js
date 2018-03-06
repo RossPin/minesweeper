@@ -2,28 +2,35 @@ document.addEventListener('DOMContentLoaded', startGame)
 
 // Define your `board` object here!
 var board = {cells: []}
+var gridSize = 5;
 
 // add cells to board.cells  
-var gridSize = 3;
-for (var i=0; i < gridSize; i++) {
-  for (var j=0; j < gridSize; j++){
-    board.cells.push({row: i, col: j, isMine: false, hidden: true})
+function addCells () {
+  for (var i=0; i < gridSize; i++) {
+    for (var j=0; j < gridSize; j++){
+      board.cells.push({row: i, col: j, isMine: false, hidden: true})
+    }
   }
 }
 
-// define cells as mines
-board.cells[3].isMine = true
-board.cells[8].isMine = true
-console.log(board.cells)
+//define random cells as mines to maximum 25% of the board
+function initMines () {
+  for (var i = 0; i < Math.floor(board.cells.length/4); i++) {
+    board.cells[Math.floor(Math.random() * board.cells.length)].isMine = true
+  }
+}
 
 function startGame () {
   // Don't remove this function call: it makes the game work!
+  addCells()  
+  initMines()
   for (var i = 0; i<board.cells.length; i++){
     board.cells[i].surroundingMines = countSurroundingMines(board.cells[i])
   }
   lib.initBoard()
   document.addEventListener('click', checkForWin)
   document.addEventListener('contextmenu', checkForWin)
+  document.getElementById('resetButton').addEventListener('click', resetBoard)
 }
 
 // Define this function to look for a win condition:
@@ -57,5 +64,12 @@ function countSurroundingMines (cell) {
     if (surroundingCells[i].isMine) count++
   }
   return count
+}
+
+//reset the board
+function resetBoard () {
+  board = {cells: []}
+  document.getElementsByClassName('board')[0].innerHTML = ''  
+  startGame()
 }
 

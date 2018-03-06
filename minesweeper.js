@@ -2,7 +2,9 @@ document.addEventListener('DOMContentLoaded', startGame)
 
 // Define your `board` object here!
 var board = {cells: []}
-var gridSize = 5;
+var gridSize = 4
+var bombSound = new Audio('bomb.mp3')
+
 
 // add cells to board.cells  
 function addCells () {
@@ -21,7 +23,7 @@ function initMines () {
 }
 
 function startGame () {
-  // Don't remove this function call: it makes the game work!
+  // Don't remove this function call: it makes the game work!  
   addCells()  
   initMines()
   for (var i = 0; i<board.cells.length; i++){
@@ -29,6 +31,7 @@ function startGame () {
   }
   lib.initBoard()
   document.addEventListener('click', checkForWin)
+  document.addEventListener('click', checkIfMine)
   document.addEventListener('contextmenu', checkForWin)
   document.getElementById('resetButton').addEventListener('click', resetBoard)
 }
@@ -38,15 +41,25 @@ function startGame () {
 // 1. Are all of the cells that are NOT mines visible?
 // 2. Are all of the mines marked?
 function checkForWin () {  
+  var win = true
   for (i = 0; i < board.cells.length; i++) {
     //if cell is mine and not marked exit function
-    if (board.cells[i].isMine && !board.cells[i].isMarked) return
+    if (board.cells[i].isMine && !board.cells[i].isMarked) win = false
     //if cell is not mine and still hidden exit function
-    if (!board.cells[i].isMine && board.cells[i].hidden) return
+    if (!board.cells[i].isMine && board.cells[i].hidden) win = false
   } 
+  
   // You can use this function call to declare a winner (once you've
   // detected that they've won, that is!)
-  lib.displayMessage('You win!')
+  if (win) lib.displayMessage('You win!')
+}
+
+function checkIfMine () {
+  for (i = 0; i < board.cells.length; i++) {
+    if (board.cells[i].isMine && !board.cells[i].hidden){      
+      bombSound.play()
+    }
+  }
 }
 
 // Define this function to count the number of mines around the cell

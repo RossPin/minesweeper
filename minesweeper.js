@@ -3,8 +3,6 @@ document.addEventListener('DOMContentLoaded', startGame)
 // Define your `board` object here!
 var board = {cells: []}
 var gridSize = 4
-var bombSound = new Audio('bomb.mp3')
-
 
 // add cells to board.cells  
 function addCells () {
@@ -24,40 +22,42 @@ function initMines () {
 
 function startGame () {
   // Don't remove this function call: it makes the game work!  
+  buildControls()
   addCells()  
   initMines()
   for (var i = 0; i<board.cells.length; i++){
     board.cells[i].surroundingMines = countSurroundingMines(board.cells[i])
   }
   lib.initBoard()
-  document.addEventListener('click', checkForWin)
-  document.addEventListener('click', checkIfMine)
-  document.addEventListener('contextmenu', checkForWin)
-  document.getElementById('resetButton').addEventListener('click', resetBoard)
+  
+  // Add listner to perform checks with left or right click on board
+  var gameBoard = document.getElementsByClassName('board')[0]
+  gameBoard.addEventListener('click', checkForWin)
+  gameBoard.addEventListener('click', checkIfMine)
+  gameBoard.addEventListener('contextmenu', checkForWin)  
 }
 
 // Define this function to look for a win condition:
 //
 // 1. Are all of the cells that are NOT mines visible?
 // 2. Are all of the mines marked?
-function checkForWin () {  
-  var win = true
+function checkForWin () {    
   for (i = 0; i < board.cells.length; i++) {
     //if cell is mine and not marked exit function
-    if (board.cells[i].isMine && !board.cells[i].isMarked) win = false
+    if (board.cells[i].isMine && !board.cells[i].isMarked) return
     //if cell is not mine and still hidden exit function
-    if (!board.cells[i].isMine && board.cells[i].hidden) win = false
-  } 
-  
+    if (!board.cells[i].isMine && board.cells[i].hidden) return
+  }  
   // You can use this function call to declare a winner (once you've
   // detected that they've won, that is!)
-  if (win) lib.displayMessage('You win!')
+  lib.displayMessage('You win!')
+  new Audio('sound/cheer.mp3').play()
 }
 
 function checkIfMine () {
   for (i = 0; i < board.cells.length; i++) {
     if (board.cells[i].isMine && !board.cells[i].hidden){      
-      bombSound.play()
+     new Audio('sound/bomb.mp3').play()
     }
   }
 }
@@ -81,8 +81,34 @@ function countSurroundingMines (cell) {
 
 //reset the board
 function resetBoard () {
-  board = {cells: []}
+  board = {cells: []}  
   document.getElementsByClassName('board')[0].innerHTML = ''  
   startGame()
 }
+
+// Add options and listener to grid menu and reset button 
+function buildControls () {
+  var gridMenu = document.getElementById('gridSelect')  
+  var select = ''
+  gridMenu.innerHTML = '' 
+  for (var i = 3; i <= 6; i++) {
+    if (i == gridSize) select = 'selected'
+    addGridOption (i, select, gridMenu)
+    select = ''
+  }
+  gridMenu.addEventListener('change', changeGridSize)
+  document.getElementById('resetButton').addEventListener('click', resetBoard)
+}
+
+// add option to menu
+function addGridOption (size, select, gridMenu) {
+  gridMenu.innerHTML += '<option value="' + size + '" ' + select + '>' + size + ' x ' + size + '</option>'
+}
+
+// Update gridSize variable from selection menu
+function changeGridSize () {
+  gridSize = document.getElementById('gridSelect').value
+  resetBoard()
+}
+
 
